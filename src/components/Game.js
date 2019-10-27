@@ -7,27 +7,13 @@ import "./Game.css";
 import porg from "../assets/porg.png";
 import chewbacca from "../assets/chewbacca.png";
 import label from "../json/label";
+import getInitialGameState from "../game/getInitialGameState";
 
 export default class Game extends Component {
   constructor(props) {
     super(props);
-
     const size = ticTacToe.boardSize.width * ticTacToe.boardSize.height;
-    this.state = {
-      history: [
-        {
-          squares: Array(size).fill(null),
-          cell: null
-        }
-      ],
-      stepNumber: 0,
-      isPlayerOneNext: true,
-      isUndoingMove: false,
-      isDescendingOrder: false,
-      winnerSquares: [],
-      statusText: ticTacToe.textStatusNext(),
-      statusPlayer: label.playerOne
-    };
+    this.state = getInitialGameState(size);
   }
 
   updateStatus(squares, playerWinner, isPlayerOneNext) {
@@ -112,9 +98,17 @@ export default class Game extends Component {
     return false;
   };
 
+  restartGame = () => {
+    const size = ticTacToe.boardSize.width * ticTacToe.boardSize.height;
+    const state = getInitialGameState(size);
+    this.setState({
+      ...state
+    });
+  };
+
   renderRestartButton = () => {
     if (this.hasGameStarted()) {
-      return <button>Restart game</button>;
+      return <button onClick={() => this.restartGame()}>Restart game</button>;
     }
     return null;
   };
