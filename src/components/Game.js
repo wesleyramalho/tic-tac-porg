@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
-import Board from './Board';
-import ticTacToe from '../game/ticTacToe';
-import { playMoveSound, playWinSound } from '../game/sound';
-import './Game.css';
-import porg from '../assets/porg.png';
-import chewbacca from '../assets/chewbacca.png';
-import label from '../json/label';
+import Board from "./Board";
+import ticTacToe from "../game/ticTacToe";
+import { playMoveSound, playWinSound } from "../game/sound";
+import "./Game.css";
+import porg from "../assets/porg.png";
+import chewbacca from "../assets/chewbacca.png";
+import label from "../json/label";
 
 export default class Game extends Component {
   constructor(props) {
@@ -17,7 +17,7 @@ export default class Game extends Component {
       history: [
         {
           squares: Array(size).fill(null),
-          cell: null,
+          cell: null
         }
       ],
       stepNumber: 0,
@@ -26,20 +26,22 @@ export default class Game extends Component {
       isDescendingOrder: false,
       winnerSquares: [],
       statusText: ticTacToe.textStatusNext(),
-      statusPlayer: label.playerOne,
+      statusPlayer: label.playerOne
     };
   }
 
   updateStatus(squares, playerWinner, isPlayerOneNext) {
-    const statusText = ticTacToe.textStatus(
-      squares, playerWinner);
+    const statusText = ticTacToe.textStatus(squares, playerWinner);
 
     const statusPlayer = ticTacToe.playerStatus(
-      squares, playerWinner, isPlayerOneNext);
+      squares,
+      playerWinner,
+      isPlayerOneNext
+    );
 
     this.setState({
       statusText,
-      statusPlayer,
+      statusPlayer
     });
   }
 
@@ -52,14 +54,15 @@ export default class Game extends Component {
       return;
     }
 
-    squares[squarePosition] = this.state.isPlayerOneNext ?
-      label.playerOne : label.playerTwo;
+    squares[squarePosition] = this.state.isPlayerOneNext
+      ? label.playerOne
+      : label.playerTwo;
 
     const winnerSquares = ticTacToe.calculateWinnerSquares(squares);
     const newHistory = history.concat([
       {
         squares: squares,
-        cell: squarePosition,
+        cell: squarePosition
       }
     ]);
 
@@ -78,20 +81,20 @@ export default class Game extends Component {
       stepNumber: history.length,
       isPlayerOneNext: newIsPlayerOneNext,
       isUndoingMove: false,
-      winnerSquares,
+      winnerSquares
     });
   }
 
-  handleCheckbox = (event) =>
+  handleCheckbox = event =>
     this.setState({
       isDescendingOrder: event.target.checked
     });
 
-  handleUndo = (step) => {
+  handleUndo = step => {
     const current = this.state.history[step];
-    const squares = current.squares;
+    const { squares } = current;
     const winnerSquares = ticTacToe.calculateWinnerSquares(squares);
-    const newIsPlayerOneNext = (step % 2) === 0;
+    const newIsPlayerOneNext = step % 2 === 0;
     const playerWinner = winnerSquares ? squares[winnerSquares[0]] : null;
     this.updateStatus(squares, playerWinner, newIsPlayerOneNext);
 
@@ -99,29 +102,45 @@ export default class Game extends Component {
       stepNumber: step,
       isPlayerOneNext: newIsPlayerOneNext,
       isUndoingMove: true,
-      winnerSquares,
+      winnerSquares
     });
-  }
+  };
+
+  hasGameStarted = () => {
+    const { stepNumber } = this.state;
+    if (stepNumber > 0) return true;
+    return false;
+  };
+
+  renderRestartButton = () => {
+    if (this.hasGameStarted()) {
+      return <button>Restart game</button>;
+    }
+    return null;
+  };
 
   renderMoves = () => {
-    const history = this.state.history;
+    const { history } = this.state;
 
     const moves = history.map((step, move) => {
       // calculate move position as (row, column)
       const row = 1 + Math.floor(step.cell / 3);
-      const column = 1 + step.cell % 3;
-      const desc = move ?
-        `${1+move}. ${label.move} (${row}, ${column})` :
-        `1. ${label.start}`;
+      const column = 1 + (step.cell % 3);
+      const desc = move
+        ? `${1 + move}. ${label.move} (${row}, ${column})`
+        : `1. ${label.start}`;
 
       const moveSelectedClass =
-        this.state.isUndoingMove && this.state.stepNumber === move ?
-        'move-selected' : '';
-      
+        this.state.isUndoingMove && this.state.stepNumber === move
+          ? "move-selected"
+          : "";
+
       return (
-        <div key={move}
-          className={ moveSelectedClass }
-          onClick={() => this.handleUndo(move)}>
+        <div
+          key={move}
+          className={moveSelectedClass}
+          onClick={() => this.handleUndo(move)}
+        >
           {desc}
         </div>
       );
@@ -130,26 +149,26 @@ export default class Game extends Component {
     if (this.state.isDescendingOrder) {
       const reversedMoves = moves.slice(0).reverse();
 
-      return <div className='moves-list'>{ reversedMoves }</div>;
+      return <div className="moves-list">{reversedMoves}</div>;
     }
 
-    return <div className='moves-list'>{ moves }</div>;
-  }
+    return <div className="moves-list">{moves}</div>;
+  };
 
   renderStatus(text, player) {
-    let image = '';
+    let image = "";
     if (player) {
       if (player === label.playerOne) {
-        image = <img src={ porg } alt={ player }/>;
+        image = <img src={porg} alt={player} />;
       } else {
-        image = <img src={ chewbacca } alt={ player }/>;
+        image = <img src={chewbacca} alt={player} />;
       }
     }
 
     return (
-      <div className='status'>
-        <span>{ text }</span>
-        { image }
+      <div className="status">
+        <span>{text}</span>
+        {image}
       </div>
     );
   }
@@ -160,24 +179,22 @@ export default class Game extends Component {
 
     return (
       <article>
-        <section className='game'>
-          { this.renderStatus(this.state.statusText, this.state.statusPlayer) }
+        <section className="game">
+          {this.renderStatus(this.state.statusText, this.state.statusPlayer)}
           <Board
             squares={current.squares}
-            winnerSquares={ this.state.winnerSquares }
+            winnerSquares={this.state.winnerSquares}
             onClick={i => this.handleClick(i)}
           />
         </section>
-        <section className='moves'>
+        <section className="moves">
           <label>
-            <input
-              type='checkbox'
-              onChange={ this.handleCheckbox }
-            />
+            <input type="checkbox" onChange={this.handleCheckbox} />
             <span></span>
-            { label.sort }
+            {label.sort}
           </label>
-          { this.renderMoves() }
+          {this.renderMoves()}
+          {this.renderRestartButton()}
         </section>
       </article>
     );
